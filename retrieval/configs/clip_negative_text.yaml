@@ -1,0 +1,14 @@
+checkpoint_dir: ./save/clip_negative_text/
+
+losses_log_every: 25
+precision: 32
+load_feat: true
+data_in_memory: false
+
+batch_size: 1600
+valid_batch_size: 200
+clip_grad_norm: 0
+
+epochs: 30
+use_grammar: true
+joint_out: false

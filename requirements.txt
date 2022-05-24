@@ -1,0 +1,15 @@
+transformers
+h5py
+pandas
+tqdm
+scikit-image
+ipywidgets
+wandb
+bert-score
+ftfy
+timm
+lmdbdict
+yacs
+pyemd
+gensim
+pytorch-lightning==1.0.0
