@@ -41,44 +41,9 @@ if __name__ == '__main__':
     args = parser.parse_args()
 
     if args.reward == 'mle':
-        cfg = f'configs/phrase1/fg_clipRN50_{args.reward}.yml'
+        cfg = f'configs/phase1/fg_clipRN50_{args.reward}.yml'
     else:
-        cfg = f'configs/phrase2/fg_clipRN50_{args.reward}.yml'
-    # ckpt_fname = f'{args.reward}-last.ckpt    
-
-    # if args.model_name == 'mle':
-    #     cfg = 'configs/phrase2/clipRN50_mle.yml'
-    #     ckpt_fname = 'mle-last.ckpt'
-
-    # elif args.model_name == 'clips':
-    #     cfg = 'configs/phrase2/clipRN50_clips.yml'
-
-    # elif args.model_name == 'cider':
-
-    # elif args.model_name == 'clips_cider':
-
-    # elif args.model_name == 'clips_grammar':
-
-    # # # CLIP-S
-    # model_name = "clips"
-    # cfg = 'configs/phrase2/clipRN50_clips.yml'
-    # ckpt_fname = 'clipscore-last.ckpt'
-
-    # # CIDER
-    # model_name = "cider"
-    # cfg = 'configs/phrase2/clipRN50_cider.yml'
-    # ckpt_fname = 'cider-last.ckpt'
-
-    # # CLIP-S + CIDER
-    # model_name = "cider_clips"
-    # cfg = 'configs/phrase2/clipRN50_cider_clips.yml'
-    # ckpt_fname = 'cider_clipslast.ckpt'
-
-    # CLIP-S + Grammar
-    # model_name = "clips_grammar"
-    # cfg = 'configs/phrase2/clipRN50_clips_grammar.yml'
-
-    # ckpt_fname = f'{model_name}-last.ckpt'
+        cfg = f'configs/phase2/fg_clipRN50_{args.reward}.yml'
 
     print("Loading cfg from", cfg)
 
@@ -98,7 +63,6 @@ if __name__ == '__main__':
 
     ckpt_path = opt.checkpoint_path + '-last.ckpt'
 
-    # /print("Loading checkpoint from", opt.checkpoint_path+, ckpt_fname))
     print("Loading checkpoint from", ckpt_path)
     raw_state_dict = torch.load(
         ckpt_path,
@@ -150,9 +114,6 @@ if __name__ == '__main__':
         drop_last=False,
         collate_fn=dataset.collate_func
     )
-
-    # test_iter = iter(test_loader)
-    # batch = next(test_iter)
 
     eval_kwargs = {'dataset': opt.input_json}
     eval_kwargs.update(vars(opt))

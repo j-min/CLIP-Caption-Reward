@@ -11,13 +11,13 @@ seq_per_img: 5
 batch_size: 160
 learning_rate: 0.0005
 
-checkpoint_path: save/clipRN50_clips_grammar
+checkpoint_path: save/clipRN50_clips_grammar/clipRN50_clips_grammar
 
 use_multi_rewards: true
 use_grammar: true
 use_grammar_baseline: true
 # clip_load_path: '/scratch-space/retrieval/save/clip_negative_text/clip_negative_text-epoch=10.ckpt'
-clip_load_path: '../../../retrieval/save/clip_negative_text/clip_negative_text-epoch=12.ckpt'
+clip_load_path: 'retrieval/save/clip_negative_text/clip_negative_text-epoch=12.ckpt'
 
 # Notice: because I'm to lazy, I reuse the option name for RNNs to set the hyperparameters for transformer:
 # N=num_layers
