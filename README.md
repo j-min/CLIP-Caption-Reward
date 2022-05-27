@@ -1,7 +1,7 @@
 # Fine-grained Image Captioning with CLIP Reward
 
 * Authors: [Jaemin Cho](https://j-min.io), [David Seunghyun Yoon](https://david-yoon.github.io/), [Ajinkya Kale](https://www.linkedin.com/in/kaleajinkya/), [Franck Dernoncourt](https://research.adobe.com/person/franck-dernoncourt), [Trung Bui](https://sites.google.com/site/trungbuistanford/), [Mohit Bansal](https://www.cs.unc.edu/~mbansal/)
-* [Findings of NAACL 2022 Paper]()
+* [Findings of NAACL 2022 Paper](https://arxiv.org/abs/2205.13115)
 * [![Open In Colab](https://colab.research.google.com/assets/colab-badge.svg)](https://colab.research.google.com/drive/1pcXci44C421_m1DeByATSBEeM1JXO7DJ) (Inference using pretrained model on custom image)
 
 <img src="./assets/teaser.png" alt="teaser image" width="800"/>
@@ -70,7 +70,7 @@ pip install detectron2 -f https://dl.fbaipublicfiles.com/detectron2/wheels/cu113
 
 # Setup coco-caption (optional for text metric evaluation)
 git clone https://github.com/clip-vil/cider
-git clone https://github.com/clip-vil/coco-caption/
+git clone https://github.com/clip-vil/coco-caption
 bash get_stanford_models.sh
 bash get_google_word2vec_model.sh
 
@@ -149,12 +149,12 @@ Place checkpoints like as below. The `.ckpt` file size for captioning and CLIP m
     coco-train-words.p
 ```
 
-* text processing
+* Text processing
 ```bash
 python scripts/prepro_labels.py --input_json data/dataset_coco.json --output_json data/cocotalk.json --output_h5 data/cocotalk
 ```
 
-* COCO feature extraction
+* Visual feature extraction
 ```bash
 python scripts/clip_prepro_feats.py --input_json data/dataset_coco.json --output_dir data/cocotalk --images_root datasets/COCO/images --model_type RN50
 
@@ -163,7 +163,7 @@ python scripts/clip_prepro_feats.py --input_json data/dataset_coco.json --output
 ```
 
 
-* COCO clipscore fetaure extraction
+* Visual fetaure extraction
 ```bash
 python scripts/clipscore_prepro_feats.py --input_json data/dataset_coco.json --output_dir data/cocotalk --images_root datasets/COCO/images
 
@@ -171,7 +171,7 @@ python scripts/clipscore_prepro_feats.py --input_json data/dataset_coco.json --o
 --n_jobs 4 --job_id 0
 ```
 
-## FineCapEval Preprocessing
+## FineCapEval
 * Download files from https://drive.google.com/drive/folders/1jlwInAsVo-PdBdJlmHKPp34dLnxIIMLx?usp=sharing
 ```bash
 .data/
@@ -183,7 +183,7 @@ FineCapEval/
             XXX.jpg
 ```
 
-* Feature extraction
+* Visual feature extraction
 ```bash
 python scripts_FineCapEval/clip_prepro_feats.py --input_json data/FineCapEval.json --output_dir data/FineCapEval --images_root datasets/FineCapEval/images --model_type RN50
 
