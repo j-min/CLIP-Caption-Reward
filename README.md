@@ -21,29 +21,23 @@
 ./cider
 ./coco-caption
 
-# Pretrained CLIP as feature extractor
-./clip
+# Preprocessing
+./clip # CLIP feature extractor
+./scripts # COCO preprocessing
+./scripts_FineCapEval # FineCapEval preprocessing
+./data # Storing preprocessed features
 
-# Core model / data processing code
+# Core model / Rewards / Data loading
 ./captioning
 
-# Training/Evaluation script (python)
+# Training / Evaluation
 ./tools
-
-# Training/Evaluation script (bash)
-./scripts
-
-# Training/Evaluation script for FineCapEval (bash)
-./scripts_FineCapEval
 
 # Fine-tuning CLIP Text encoder
 ./retrieval
 
 # Pretrained checkpoints
 ./save
-
-# Storing preprocessed features
-./data
 
 # Storing original dataset files
 ./datasets
@@ -97,7 +91,7 @@ Place checkpoints like as below. The `.ckpt` file size for captioning and CLIP m
     clipRN50_mle/
         clipRN50_mle-last.ckpt
 
-# Finetuned CLIP
+# Finetuned CLIP Text encoder
 ./retrieval/
     save/
         clip_negative_text-last.ckpt
@@ -110,17 +104,17 @@ Place checkpoints like as below. The `.ckpt` file size for captioning and CLIP m
 
 ```
 # Original dataset files - to be downloaded
-./datasets
+./datasets/
+    # Download from http://mscoco.org/dataset/#download
     COCO/
-        # download from MS COCO
         images/
             train2014/
             val2014/
-        # download from MS COCO
         annotations/
             captions_train2014.json
             captions_val2014.json
 
+    # Download from https://drive.google.com/drive/folders/1jlwInAsVo-PdBdJlmHKPp34dLnxIIMLx
     FineCapEval/
         images/
             XXX.jpg
@@ -131,7 +125,7 @@ Place checkpoints like as below. The `.ckpt` file size for captioning and CLIP m
 * Download files
 ```bash
 ./datasets/
-    # Download images and annotations from http://mscoco.org/dataset/#download
+    # Download from http://mscoco.org/dataset/#download
      COCO/
         images/
             train2014/
@@ -174,13 +168,13 @@ python scripts/clipscore_prepro_feats.py --input_json data/dataset_coco.json --o
 ## FineCapEval
 * Download files from https://drive.google.com/drive/folders/1jlwInAsVo-PdBdJlmHKPp34dLnxIIMLx?usp=sharing
 ```bash
-.data/
-    FineCapEval.csv
-
-# Download from https://drive.google.com/drive/folders/1jlwInAsVo-PdBdJlmHKPp34dLnxIIMLx?usp=sharing
-FineCapEval/
+./datasets/
+    FineCapEval/
         images/
             XXX.jpg
+
+./data/
+    FineCapEval.csv
 ```
 
 * Visual feature extraction
