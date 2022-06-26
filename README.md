@@ -75,8 +75,9 @@ sudo apt install default-jre
 
 
 ## Download Pretrained models
-We host model checkpoints via [google drive](https://drive.google.com/drive/folders/1-1BQbBlwwDzcqX1iMPn7UpjTeGYtAUfT)
-Place checkpoints like as below. The `.ckpt` file size for captioning and CLIP models are 669.65M and 1.12G, respectively.
+We host model checkpoints via [google drive](https://drive.google.com/drive/folders/1-1BQbBlwwDzcqX1iMPn7UpjTeGYtAUfT).
+Download checkpoints as below.
+The `.ckpt` file size for captioning and CLIP models are 669.65M and 1.12G, respectively.
 ```bash
 # Captioning model
 ./save/
@@ -157,7 +158,7 @@ python scripts/clip_prepro_feats.py --input_json data/dataset_coco.json --output
 ```
 
 
-* Visual fetaure extraction
+* Visual fetaure extraction for CLIP-S Reward
 ```bash
 python scripts/clipscore_prepro_feats.py --input_json data/dataset_coco.json --output_dir data/cocotalk --images_root datasets/COCO/images
 
@@ -174,6 +175,7 @@ python scripts/clipscore_prepro_feats.py --input_json data/dataset_coco.json --o
             XXX.jpg
 
 ./data/
+    FineCapEval.json
     FineCapEval.csv
 ```
 
