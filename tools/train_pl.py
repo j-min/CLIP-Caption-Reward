@@ -49,8 +49,6 @@ class LitModel(pl.LightningModule):
         self.struc_flag = None
         self.sc_flag = None
 
-        # if self.opt.use_clipscore:
-        # if self.opt.use_clipscore or os.getenv('EVALUATE', '0') == '1':
         # if CLIP-S+Grammar is used in reward -> Launch another CLIP-S where parameter is unchanged
         if getattr(self.opt, 'use_grammar', False):
             from captioning.utils.clipscore import CLIPScore
@@ -140,9 +138,6 @@ class LitModel(pl.LightningModule):
         data_time = torch.tensor(data_time)
 
         logger_logs = model_out.copy()
-        # if struc_flag or sc_flag:
-        #     logger_logs['reward'] = model_out['reward'].mean()
-        #     logger_logs['reward_var'] = model_out['reward'].var(1).mean()
         if struc_flag or sc_flag:
             logger_logs['reward'] = model_out['reward'].mean()
             for k in ['CLIP-S', 'RefCLIP-S', 'CIDEr', 'grammar_reward']:
@@ -156,22 +151,6 @@ class LitModel(pl.LightningModule):
         # logger_logs['training_loss'] = loss
         logger_logs['loss'] = loss
         logger_logs['data_time'] = data_time
-
-        # UserWarning: The {progress_bar:dict keyword} was deprecated in 0.9.1 and will be removed in 1.0.0
-        # Please use self.log(...) inside the lightningModule instead.
-
-        # # log on a step or aggregate epoch metric to the logger and/or progress bar
-        # # (inside LightningModule)
-        # self.log('train_loss', loss, on_step=True, on_epoch=True, prog_bar=True)
-        # warnings.warn(*args, **kwargs)
-        # UserWarning: The {log:dict keyword} was deprecated in 0.9.1 and will be removed in 1.0.0
-        # Please use self.log(...) inside the lightningModule instead.
-
-        # output = {
-        #     'loss': loss,
-        #     'log': logger_logs,
-        #     'progress_bar': {'data_time': data_time}
-        # }
 
         for k, v in logger_logs.items():
             if k in ['reward', 'reward_var', 'data_time', 'CLIP-S', 'RefCLIP-S', 'CIDEr', 'grammar_reward']:
@@ -239,20 +218,13 @@ class LitModel(pl.LightningModule):
                     print('--' * 10)
             sents = utils.decode_sequence(model.vocab, seq)
 
-            # if self.opt.use_clipscore or os.getenv('EVALUATE', '0') == '1':
-            # text_feat = self.lw_model.clipscore_model.text_extract(sents)
             text_feat = self.val_clipscore_model.text_extract(sents, proj_norm=False)
 
             text_cont_feat = self.val_clipscore_model.clip_model.text_projection(text_feat)
             text_cont_feat = text_cont_feat / text_cont_feat.norm(dim=-1, keepdim=True)
 
             vis_feat = data['clip_vis_feats']
-            # if self.opt.clipscore_mode == 'clip_s':
-            #     clip_s = self.val_clipscore_model(text_feat=text_cont_feat, img_feat=vis_feat, mode='clip_s')
-
-            # elif self.opt.clipscore_mode == 'refclip_s':
             clip_s = self.val_clipscore_model(text_feat=text_cont_feat, img_feat=vis_feat, mode='clip_s')
-            # ref_text = utils.decode_sequence(model.vocab, data['gts'])
 
             gt_indices = torch.arange(0, len(data['gts']))
             data_gts = [data['gts'][_] for _ in gt_indices.tolist()]
@@ -279,11 +251,8 @@ class LitModel(pl.LightningModule):
                 text_feat=text_cont_feat, img_feat=vis_feat,
                 ref_text=ref_text, ref_text_mask=ref_text_mask, mode='refclip_s')
 
-            # use_grammar = getattr(self.opt, 'use_grammar', False)
-            # joint_out = getattr(self.opt, 'joint_out', False)
             if use_grammar and not joint_out:
                 with torch.no_grad():
-                    # grammar_logit = self.val_clipscore_model.grammar_score_head(text_feat.view(-1, 512))
                     grammar_logit = self.lw_model.clipscore_model.grammar_score_head(text_feat.view(-1, 512))
                     grammar_prob = torch.softmax(grammar_logit, dim=-1)[:, 1]
 
@@ -321,13 +290,9 @@ class LitModel(pl.LightningModule):
             for k, sent in enumerate(sents):
                 entry = {'image_id': data['infos'][k]['id'], 'caption': sent,
                          'perplexity': perplexity[k].item(), 'entropy': entropy[k].item()}
-                if self.opt.use_clipscore or os.getenv('EVALUATE', '0') == '1':
-                    # if self.opt.clipscore_mode == 'clip_s':
-                        # entry['clipscore'] = clipscore[k].item()
-                        # entry['CLIP-S'] = clip_s[k].item()
-                    # elif self.opt.clipscore_mode == 'refclip_s':
-                    entry['CLIP-S'] = clip_s[k].item()
-                    entry['RefCLIP-S'] = refclip_s[k].item()
+
+                entry['CLIP-S'] = clip_s[k].item()
+                entry['RefCLIP-S'] = refclip_s[k].item()
 
                 if use_grammar and not joint_out:
                     entry['grammar_prob'] = grammar_prob[k].item()
@@ -373,8 +338,6 @@ class LitModel(pl.LightningModule):
             outputs = sum(outputs, [])
 
             opt = self.opt
-            # val_loss_mean = sum([_['val_loss']
-            # val_loss_mean = sum([_['val_loss'].cpu()
             val_loss_mean = sum([_['loss'].cpu()
                                  for _ in outputs]) / len(outputs)
 
@@ -405,33 +368,22 @@ class LitModel(pl.LightningModule):
                 else:
                     optimizer.scheduler_step(val_loss_mean)
 
-            # out = {
-            #     'val_loss': val_loss_mean
-            # }
             out = {
                 'loss': val_loss_mean
             }
             out.update(lang_stats)
-            # out['to_monitor'] = lang_stats['CIDEr'] if lang_stats is not None else -val_loss_mean
-            if self.opt.use_clipscore or os.getenv('EVALUATE', '0') == '1':
-                # if self.opt.clipscore_mode == 'clip_s':
-                    # out['clipscore'] = sum([p['clipscore'] for p in predictions]) / len(predictions)
-                    # print('CLIPScore', out['clipscore'])
-                    # out['CLIP-S'] = sum([p['CLIP-S'] for p in predictions]) / len(predictions)
-                    # print('CLIP-S', out['CLIP-S'])
-                # elif self.opt.clipscore_mode == 'refclip_s':
-                out['CLIP-S'] = sum([p['CLIP-S'] for p in predictions]) / len(predictions)
-                print('CLIP-S', out['CLIP-S'])
+            out['CLIP-S'] = sum([p['CLIP-S'] for p in predictions]) / len(predictions)
+            print('CLIP-S', out['CLIP-S'])
 
-                out['RefCLIP-S'] = sum([p['RefCLIP-S'] for p in predictions]) / len(predictions)
-                print('RefCLIP-S', out['RefCLIP-S'])
+            out['RefCLIP-S'] = sum([p['RefCLIP-S'] for p in predictions]) / len(predictions)
+            print('RefCLIP-S', out['RefCLIP-S'])
 
-                if getattr(self.opt, 'use_grammar', False) and not getattr(self.opt, 'joint_out', False):
-                    out['grammar_prob'] = sum([p['grammar_prob'] for p in predictions]) / len(predictions)
-                    print('grammar_prob', out['grammar_prob'])
+            if getattr(self.opt, 'use_grammar', False) and not getattr(self.opt, 'joint_out', False):
+                out['grammar_prob'] = sum([p['grammar_prob'] for p in predictions]) / len(predictions)
+                print('grammar_prob', out['grammar_prob'])
 
-                out['BERT-S'] = sum([p['BERT-S'] for p in predictions]) / len(predictions)
-                print('BERT-S', out['BERT-S'])
+            out['BERT-S'] = sum([p['BERT-S'] for p in predictions]) / len(predictions)
+            print('BERT-S', out['BERT-S'])
         else:
             out = {}
 
@@ -442,36 +394,13 @@ class LitModel(pl.LightningModule):
         out = {k: torch.tensor(v) if not torch.is_tensor(
             v) else v for k, v in out.items()}
 
-        # return {
-        #     'progress_bar': {'val_loss': out['val_loss']},
-        #     'log': out,
-        # }
         for k, v in out.items():
-            # if k in ['loss', 'clipscore', 'RefCLIP-S', 'CIDEr']:
-            #     if split != 'test':
-            #         self.log(f'{split}/{k}', v, prog_bar=True)
-            # elif k == 'to_monitor':
-            #     if split != 'test':
-            #         self.log(f'{split}/{k}', v)
-            # else:
+
             self.log(f'{split}/{k}', v)
 
     def test_epoch_end(self, outputs):
-        # out = self.validation_epoch_end(outputs, 'test')
-        # out['progress_bar'] = {
-        #     # 'test_loss': out['progress_bar']['val_loss']
-        #     'test_loss': out['progress_bar']['loss']
-        # }
-        # out['log']['test_loss'] = out['log']['val_loss']
-        # del out['log']['val_loss']
-        # del out['log']['to_monitor']
-        
-        # out['log'] = {'test_'+k if 'test' not in k else k:v \
-        #               for k,v in out['log'].items()}
-        
-        # return out
         self.validation_epoch_end(outputs, 'test')
-        
+
     def configure_optimizers(self):
         opt = self.opt
         model = self.model
@@ -483,13 +412,11 @@ class LitModel(pl.LightningModule):
             optimizer = utils.get_std_opt(
                 model, optim_func=opt.optim, factor=opt.noamopt_factor, warmup=opt.noamopt_warmup)
         elif opt.reduce_on_plateau:
-            # optimizer = utils.build_optimizer(model.parameters(), opt)
             optimizer = utils.build_optimizer(parameters, opt)
             optimizer = utils.ReduceLROnPlateau(optimizer,
                                                 factor=opt.reduce_on_plateau_factor,
                                                 patience=opt.reduce_on_plateau_patience)
         else:
-            # optimizer = utils.build_optimizer(model.parameters(), opt)
             optimizer = utils.build_optimizer(parameters, opt)
         return [optimizer], []
 
@@ -523,8 +450,6 @@ class LitModel(pl.LightningModule):
         if '_vocab' in state_dict:
             self.model.vocab = utils.deserialize(state_dict['_vocab'])
             del state_dict['_vocab']
-        # elif strict:
-        #     raise KeyError
         if '_opt' in state_dict:
             saved_model_opt = utils.deserialize(state_dict['_opt'])
             del state_dict['_opt']
@@ -538,8 +463,6 @@ class LitModel(pl.LightningModule):
                     continue
                 assert getattr(saved_model_opt, checkme) == getattr(
                     opt, checkme), "Command line argument and saved model disagree on '%s' " % checkme
-        # elif strict:
-        #     raise KeyError
         self.model.load_state_dict(state_dict, strict)
 
 
@@ -600,22 +523,15 @@ opt = opts.parse_opt()
 
 checkpoint_callback = ModelCheckpoint(
     filepath=opt.checkpoint_path,
-    # dirpath=opt.checkpoint_path,
     save_last=True,
     save_top_k=1,
     verbose=True,
-    # monitor='to_monitor',
-    # monitor='val/to_monitor',
     monitor='val/CIDEr',
     mode='max',
-    # prefix=opt.id+'_',
     prefix=opt.id,
-    # filename=f'{opt.id}_',
 )
 
 verbose = True
-# import torch
-# if torch.cuda.current_device() in [0, -1]:
 if 'LOCAL_RANK' in os.environ and os.environ['LOCAL_RANK'] != '0':
     verbose = False
 
@@ -633,8 +549,6 @@ assert opt.batch_size % torch.cuda.device_count() == 0
 opt.batch_size = opt.batch_size // torch.cuda.device_count()
 
 # If resume from last checkpoint
-# if opt.start_from is not None and os.path.isfile(os.path.join(opt.start_from, f'{opt.id}_last.ckpt')):
-#     resume_from = os.path.join(opt.start_from, f'{opt.id}_last.ckpt')
 if opt.start_from is not None:
     resume_from = os.path.join(opt.start_from, f'{opt.id}-last.ckpt')
     if os.path.isfile(resume_from):
@@ -654,29 +568,19 @@ wandb_logger = WandbLogger(
 
 if verbose:
     wandb_logger.experiment.config.update(opt)
-    from pathlib import Path
-    import glob
-    import wandb
-    # src_dir = Path(__file__).resolve().parent.parent
-    glob_str = "**/*.py"
-    base_path = './'
-    wandb.save(glob_str=glob_str, base_path=base_path)
-    
-    # code = wandb.Artifact('project-source', type='code')
-    # for path in glob.glob('**/*.py', recursive=True):
-    #     code.add_file(path, name='source/'+path)
-    #     print(path)
-    # wandb.run.use_artifact(code)
 
-
+    # https://docs.wandb.ai/ref/python/run#log_code
+    wandb_logger._experiment.log_code(
+        root=".",
+        include_fn=lambda path: path.endswith(".py")
+    )
 
 
 lit = LitModel(opt)
-# warning grad_clip_mode is ignored.
+
 trainer = pl.Trainer(
     callbacks=[
         OnEpochStartCallback(),
-        # pl.callbacks.lr_logger.LearningRateLogger()
         pl.callbacks.LearningRateMonitor()
     ],
     default_root_dir=opt.checkpoint_path,
@@ -688,17 +592,10 @@ trainer = pl.Trainer(
     gpus=torch.cuda.device_count(),
     checkpoint_callback=checkpoint_callback,
     log_gpu_memory='min_max',
-    # log_save_interval=opt.losses_log_every,
     log_every_n_steps=opt.losses_log_every,
     profiler=True,
-    # profiler='simple',
-    # row_log_interval=10,  # what is it?
     flush_logs_every_n_steps=10,
-    num_sanity_val_steps=0,
-    # val_check_interval=0.01,
-    # limit_train_batches=500,
-    # progress_bar_refresh_rate=0,
-    # fast_dev_run=True,
+    num_sanity_val_steps=10,
     precision=opt.precision,
     logger=wandb_logger
 )
