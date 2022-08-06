@@ -66,6 +66,8 @@ pip install detectron2 -f https://dl.fbaipublicfiles.com/detectron2/wheels/cu113
 # Setup coco-caption (optional for text metric evaluation)
 git clone https://github.com/clip-vil/cider
 git clone https://github.com/clip-vil/coco-caption
+
+cd coco-caption
 bash get_stanford_models.sh
 bash get_google_word2vec_model.sh
 
