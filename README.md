@@ -170,7 +170,7 @@ python scripts/clipscore_prepro_feats.py --input_json data/dataset_coco.json --o
 ```
 
 ## FineCapEval
-* Download files from https://huggingface.co/j-min/CLIP-Caption-Reward/tree/main/FineCapEval
+* Download files from https://huggingface.co/datasets/j-min/FineCapEval and save them as follows:
 ```bash
 ./datasets/
     FineCapEval/
