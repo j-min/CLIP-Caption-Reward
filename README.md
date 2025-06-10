@@ -78,7 +78,7 @@ sudo apt install default-jre
 
 
 ## Download Pretrained models
-We host model checkpoints via [google drive](https://drive.google.com/drive/folders/1-1BQbBlwwDzcqX1iMPn7UpjTeGYtAUfT).
+We host model checkpoints via [huggingface](https://huggingface.co/j-min/CLIP-Caption-Reward).
 Download checkpoints as below.
 The `.ckpt` file size for captioning and CLIP models are 669.65M and 1.12G, respectively.
 ```bash
@@ -118,7 +118,7 @@ The `.ckpt` file size for captioning and CLIP models are 669.65M and 1.12G, resp
             captions_train2014.json
             captions_val2014.json
 
-    # Download from https://drive.google.com/drive/folders/1jlwInAsVo-PdBdJlmHKPp34dLnxIIMLx
+    # Download from https://huggingface.co/j-min/CLIP-Caption-Reward/
     FineCapEval/
         images/
             XXX.jpg
@@ -170,7 +170,7 @@ python scripts/clipscore_prepro_feats.py --input_json data/dataset_coco.json --o
 ```
 
 ## FineCapEval
-* Download files from https://drive.google.com/drive/folders/1jlwInAsVo-PdBdJlmHKPp34dLnxIIMLx?usp=sharing
+* Download files from https://huggingface.co/j-min/CLIP-Caption-Reward/tree/main/FineCapEval
 ```bash
 ./datasets/
     FineCapEval/
